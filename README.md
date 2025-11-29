@@ -104,3 +104,37 @@ Sie macht:
 5. Latenz simulieren
 6. Alles in PostgreSQL speichern
 7. Antwort mit allen Daten zurückgeben
+
+## Frontend
+
+Basierend auf der Datenbank prompt_logs + ai_models ergeben sich typische Kennzahlen:
+📌 1. KPIs
+KPI Beschreibung
+Total Prompts Anzahl aller ausgeführten Prompts
+Total Tokens Summe aller Tokens
+Total Cost Gesamtkosten aller Prompts
+Avg Cost per Prompt Durchschnittskosten pro Prompt
+
+📊 2. Charts (4 Stück)
+
+1. Kosten pro Tag / Monat
+
+Linienchart
+→ Wie teuer waren die Prompts über die Zeit?
+
+2. Top Modelle nach Kosten
+
+Barchart
+→ Welches Modell verursacht die meisten Kosten?
+
+3. Durchschnittliche Token-Anzahl pro Modell
+
+Bar/Column chart
+→ Wichtig für Analyse der Effizienz.
+
+4. Erfolgreiche vs. Fehlerhafte Prompts
+
+Donut chart / Pie chart
+→ Wie viele Requests sind gescheitert?
+
+Das Dashboard kann später beliebig erweitert werden.
