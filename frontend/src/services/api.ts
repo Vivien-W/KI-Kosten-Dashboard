@@ -1,4 +1,3 @@
-// src/services/api.ts
 export interface DashboardApiResponse {
   totalPrompts: number;
   totalTokens: number;
