@@ -92,6 +92,22 @@ router.post("/simulate", async (req, res) => {
 });
 
 /**
+ * GET /api/prompts/models
+ * Liefert alle verfügbaren AI-Modelle aus der Datenbank
+ */
+router.get("/models", async (_req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM ai_models ORDER BY model ASC"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler in /api/models:", err);
+    res.status(500).json({ error: "Fehler beim Laden der Modelle" });
+  }
+});
+
+/**
  * GET /api/prompts/recent
  * Letzte Logs (für Charts, Tabellen, Statistiken)
  */
