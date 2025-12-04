@@ -1,6 +1,12 @@
-import pkg from "pg";
-const { Pool } = pkg;
+// src/db.ts
+import { Pool } from "pg";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  host: process.env.PGHOST,
+  port: Number(process.env.PGPORT),
+  database: process.env.PGDATABASE,
 });

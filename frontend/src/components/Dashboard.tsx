@@ -1,4 +1,3 @@
-// src/components/Dashboard.tsx
 import { useEffect, useState } from "react";
 import KPIBox from "./KPIBox.tsx";
 import CostOverTimeChart from "../charts/CostOverTimeChart.tsx";
@@ -7,6 +6,7 @@ import TokensByModelChart from "../charts/TokensByModelChart.tsx";
 import SuccessRateChart from "../charts/SuccessRateChart.tsx";
 import { fetchDashboardData } from "../services/api";
 import type { DashboardApiResponse } from "../services/api";
+import PromptInput from "./PromptInput";
 
 // --- Dashboard State Typen ---
 interface DashboardData {
@@ -71,6 +71,8 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
+      <PromptInput />
+
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KPIBox title="Total Prompts" value={data.totalPrompts} />

@@ -101,8 +101,8 @@ router.get("/models", async (_req, res) => {
       "SELECT * FROM ai_models ORDER BY model ASC"
     );
     res.json(result.rows);
-  } catch (err) {
-    console.error("Fehler in /api/models:", err);
+  } catch (err: any) {
+    console.error("Fehler in /api/models:", err.message); // <-- zeigt die DB Fehlermeldung
     res.status(500).json({ error: "Fehler beim Laden der Modelle" });
   }
 });
