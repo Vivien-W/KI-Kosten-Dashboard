@@ -3,7 +3,7 @@ import KPIBox from "./KPIBox.tsx";
 import CostOverTimeChart from "../charts/CostOverTimeChart.tsx";
 import CostByModelChart from "../charts/CostByModelChart.tsx";
 import TokensByModelChart from "../charts/TokensByModelChart.tsx";
-import SuccessRateChart from "../charts/SuccessRateChart.tsx";
+import LatencyByModelChart from "../charts/LatencyByModelChart.tsx";
 import PromptInput from "./PromptInput";
 
 import { fetchDashboardData } from "../services/stats";
@@ -23,8 +23,11 @@ interface DashboardData {
     output_tokens: number;
   }>;
 
-  // jetzt als Array, da das Chart .map() braucht
-  successRate: Array<{ name: string; value: number }>;
+  // NEU: Typ für die Latenzdaten (entspricht dem Backend-Format)
+  avgLatencyByModel: Array<{
+    model: string;
+    avg_latency_ms: number;
+  }>;
 }
 
 export default function Dashboard() {
@@ -38,13 +41,13 @@ export default function Dashboard() {
     costByModel: [],
     tokensByModel: [],
 
-    // Chart-kompatibel
-    successRate: [],
+    avgLatencyByModel: [],
   });
 
   useEffect(() => {
     fetchDashboardData()
-      .then((res) => {
+      .then((res: any) => {
+        // 'res: any' verwendet, um auf die Backend-Felder zuzugreifen
         setData({
           totalPrompts: res.totalPrompts,
           totalTokens: res.totalTokens,
@@ -53,10 +56,9 @@ export default function Dashboard() {
           costOverTime: res.costOverTime,
           costByModel: res.costByModel,
           tokensByModel: res.tokensByModel,
-          successRate: [
-            { name: "Erfolgreich", value: res.successRate.success },
-            { name: "Fehlerhaft", value: res.successRate.error },
-          ],
+
+          // NEUE ZUWEISUNG: Latenzdaten vom Backend zuweisen
+          avgLatencyByModel: res.avgLatencyByModel,
         });
       })
       .catch((err) => console.error(err));
@@ -94,11 +96,20 @@ export default function Dashboard() {
           <TokensByModelChart data={data.tokensByModel} />
         </div>
 
+        {/* Latenz-Chart */}
         <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow border">
           <h2 className="text-xl font-semibold mb-2">
-            Erfolgreich / Fehlerhaft
+            Durchschnittliche Latenz
           </h2>
-          <SuccessRateChart data={data.successRate} />
+
+          {/* JSX Korrekturen: data.avgLatencyByModel verwenden und LatencyByModelChart importieren/verwenden */}
+          {data.avgLatencyByModel?.length > 0 ? (
+            <LatencyByModelChart data={data.avgLatencyByModel} />
+          ) : (
+            <div className="h-[250px] flex items-center justify-center text-gray-500">
+              Keine Latenzdaten verfügbar.
+            </div>
+          )}
         </div>
       </div>
     </div>

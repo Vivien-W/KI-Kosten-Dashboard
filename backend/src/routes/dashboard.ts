@@ -5,7 +5,7 @@ export const dashboardRouter = Router();
 
 /**
  * GET /api/prompts/dashboard
- * Liefert: KPIs + Kostenverlauf + Kosten pro Modell + Tokens + Erfolgsrate
+ * Liefert: KPIs + Kostenverlauf + Kosten pro Modell + Tokens + Durchschnittliche Latenz
  */
 dashboardRouter.get("/", async (_req, res) => {
   try {
@@ -52,12 +52,15 @@ dashboardRouter.get("/", async (_req, res) => {
       ORDER BY model;
     `);
 
-    // ---- 5. Erfolgsrate ----
-    const successRateQuery = await pool.query(`
+    // ---- 5. DURCHSCHNITTLICHE LATENZ NACH MODELL (NEU) ----
+    const avgLatencyByModelQuery = await pool.query(`
       SELECT
-        SUM(CASE WHEN success = TRUE THEN 1 ELSE 0 END) AS success,
-        SUM(CASE WHEN success = FALSE THEN 1 ELSE 0 END) AS error
-      FROM prompt_logs;
+        model,
+        -- Stellt sicher, dass 0 zurückgegeben wird, falls die Tabelle leer ist
+        COALESCE(AVG(latency_ms), 0) AS avg_latency_ms
+      FROM prompt_logs
+      GROUP BY model
+      ORDER BY avg_latency_ms DESC;
     `);
 
     res.json({
@@ -69,7 +72,12 @@ dashboardRouter.get("/", async (_req, res) => {
       costOverTime: costOverTimeQuery.rows,
       costByModel: costByModelQuery.rows,
       tokensByModel: tokensByModelQuery.rows,
-      successRate: successRateQuery.rows[0],
+
+      // NEUE DATENZUWEISUNG FÜR DAS FRONTEND
+      avgLatencyByModel: avgLatencyByModelQuery.rows.map((row) => ({
+        model: row.model,
+        avg_latency_ms: Number(row.avg_latency_ms), // Stellt sicher, dass es eine Zahl ist
+      })),
     });
   } catch (err) {
     console.error("Dashboard Fehler:", err);
