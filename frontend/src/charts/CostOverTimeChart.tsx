@@ -3,46 +3,18 @@ import {
   Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 
-interface CostOverTimeChartProps {
-  data: {
-    date: string;
-    cost: number;
-  }[];
-}
-
-export default function CostOverTimeChart({ data }: CostOverTimeChartProps) {
+export default function CostOverTimeChart({ data }: { data: any[] }) {
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer>
-        <LineChart data={data}>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            className="stroke-gray-300 dark:stroke-gray-700"
-          />
-          <XAxis dataKey="date" className="text-gray-700 dark:text-gray-300" />
-          <YAxis className="text-gray-700 dark:text-gray-300" />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#ffffff",
-              borderRadius: "0.75rem",
-              border: "1px solid #e5e7eb",
-              color: "#000",
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="cost"
-            stroke="#3b82f6" // Blau
-            strokeWidth={3}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <LineChart width={500} height={250} data={data}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="date" />
+      <YAxis />
+      <Tooltip />
+      <Line type="monotone" dataKey="cost" stroke="#8884d8" strokeWidth={2} />
+    </LineChart>
   );
 }

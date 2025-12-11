@@ -1,41 +1,16 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
-interface SuccessRateChartProps {
-  data: {
-    name: string;
-    value: number;
-  }[];
-}
+const COLORS = ["#00c49f", "#ff4d4d"];
 
-const COLORS = ["#10b981", "#ef4444"]; // Grün = Erfolg, Rot = Fehler
-
-export default function SuccessRateChart({ data }: SuccessRateChartProps) {
+export default function SuccessRateChart({ data }: { data: any[] }) {
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer>
-        <PieChart>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#ffffff",
-              borderRadius: "0.75rem",
-              border: "1px solid #e5e7eb",
-              color: "#000",
-            }}
-          />
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="name"
-            outerRadius={80}
-            fill="#3b82f6"
-            label
-          >
-            {data.map((entry, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+    <PieChart width={350} height={250}>
+      <Pie data={data} dataKey="value" nameKey="name" outerRadius={90} label>
+        {data.map((_, i) => (
+          <Cell key={i} fill={COLORS[i]} />
+        ))}
+      </Pie>
+      <Tooltip />
+    </PieChart>
   );
 }
