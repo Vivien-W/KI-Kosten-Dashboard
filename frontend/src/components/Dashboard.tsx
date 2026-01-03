@@ -5,10 +5,11 @@ import CostByModelChart from "../charts/CostByModelChart.tsx";
 import TokensByModelChart from "../charts/TokensByModelChart.tsx";
 import LatencyByModelChart from "../charts/LatencyByModelChart.tsx";
 import PromptInput from "./PromptInput";
+import { useDarkMode } from "../context/DarkModeContext";
+import { Moon, Sun } from "lucide-react";
 
 import { fetchDashboardData } from "../services/stats";
 
-// Typen vom Backend
 interface DashboardData {
   totalPrompts: number;
   totalTokens: number;
@@ -23,7 +24,6 @@ interface DashboardData {
     output_tokens: number;
   }>;
 
-  // NEU: Typ für die Latenzdaten (entspricht dem Backend-Format)
   avgLatencyByModel: Array<{
     model: string;
     avg_latency_ms: number;
@@ -31,6 +31,8 @@ interface DashboardData {
 }
 
 export default function Dashboard() {
+  const { darkMode, setDarkMode } = useDarkMode();
+
   const [data, setData] = useState<DashboardData>({
     totalPrompts: 0,
     totalTokens: 0,
@@ -46,8 +48,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData()
-      .then((res: any) => {
-        // 'res: any' verwendet, um auf die Backend-Felder zuzugreifen
+      .then((res: any) =>
         setData({
           totalPrompts: res.totalPrompts,
           totalTokens: res.totalTokens,
@@ -56,16 +57,22 @@ export default function Dashboard() {
           costOverTime: res.costOverTime,
           costByModel: res.costByModel,
           tokensByModel: res.tokensByModel,
-
-          // NEUE ZUWEISUNG: Latenzdaten vom Backend zuweisen
           avgLatencyByModel: res.avgLatencyByModel,
-        });
-      })
+        })
+      )
       .catch((err) => console.error(err));
   }, []);
 
   return (
     <div className="space-y-8">
+      {/* ⭐ Dark Mode Toggle oben rechts oder links */}
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className="p-2 rounded-xl border hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+      >
+        {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
+
       <PromptInput />
 
       {/* KPIs */}
@@ -96,14 +103,12 @@ export default function Dashboard() {
           <TokensByModelChart data={data.tokensByModel} />
         </div>
 
-        {/* Latenz-Chart */}
         <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow border">
           <h2 className="text-xl font-semibold mb-2">
             Durchschnittliche Latenz
           </h2>
 
-          {/* JSX Korrekturen: data.avgLatencyByModel verwenden und LatencyByModelChart importieren/verwenden */}
-          {data.avgLatencyByModel?.length > 0 ? (
+          {data.avgLatencyByModel.length > 0 ? (
             <LatencyByModelChart data={data.avgLatencyByModel} />
           ) : (
             <div className="h-[250px] flex items-center justify-center text-gray-500">

@@ -1,5 +1,6 @@
 import Clock from "./components/layout/Clock.tsx";
 import Dashboard from "./components/Dashboard";
+import DarkModeToggle from "./components/layout/DarkModeToggle";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { DarkModeProvider } from "./context/DarkModeContext";
@@ -37,7 +38,11 @@ function App() {
                 <h1 className="text-3xl font-bold tracking-tight">
                   KI Kosten Dashboard
                 </h1>
-                <Clock />
+
+                <div className="flex items-center gap-4">
+                  <Clock />
+                  <DarkModeToggle />
+                </div>
               </div>
 
               {/* Seiteninhalte */}

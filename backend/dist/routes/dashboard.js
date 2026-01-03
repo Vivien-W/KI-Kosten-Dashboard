@@ -1,13 +1,9 @@
 import { Router } from "express";
 import { pool } from "../db.js";
 export const dashboardRouter = Router();
-/**
- * GET /api/prompts/dashboard
- * Liefert: KPIs + Kostenverlauf + Kosten pro Modell + Tokens + Erfolgsrate
- */
-dashboardRouter.get("/dashboard", async (_req, res) => {
+dashboardRouter.get("/", async (_req, res) => {
     try {
-        // ---- 1. KPIs ----
+        // 1) KPIs
         const kpiQuery = await pool.query(`
       SELECT
         COUNT(*) AS total_prompts,
@@ -17,7 +13,7 @@ dashboardRouter.get("/dashboard", async (_req, res) => {
       FROM prompt_logs;
     `);
         const kpi = kpiQuery.rows[0];
-        // ---- 2. Kostenentwicklung pro Tag ----
+        // 2) Kostenentwicklung pro Tag
         const costOverTimeQuery = await pool.query(`
       SELECT
         DATE(created_at) AS date,
@@ -26,7 +22,7 @@ dashboardRouter.get("/dashboard", async (_req, res) => {
       GROUP BY DATE(created_at)
       ORDER BY DATE(created_at);
     `);
-        // ---- 3. Kosten nach Modell ----
+        // 3) Kosten nach Modell
         const costByModelQuery = await pool.query(`
       SELECT
         model,
@@ -35,7 +31,7 @@ dashboardRouter.get("/dashboard", async (_req, res) => {
       GROUP BY model
       ORDER BY model;
     `);
-        // ---- 4. Tokens pro Modell ----
+        // 4) Tokens pro Modell
         const tokensByModelQuery = await pool.query(`
       SELECT
         model,
@@ -45,22 +41,55 @@ dashboardRouter.get("/dashboard", async (_req, res) => {
       GROUP BY model
       ORDER BY model;
     `);
-        // ---- 5. Erfolgsrate ----
+        // 5) DURCHSCHNITTLICHE LATENZ NACH MODELL (neu)
+        const avgLatencyByModelQuery = await pool.query(`
+      SELECT
+        model,
+        COALESCE(AVG(latency_ms), 0) AS avg_latency_ms
+      FROM prompt_logs
+      GROUP BY model
+      ORDER BY avg_latency_ms DESC;
+    `);
+        // 6) Erfolgsrate (success / error)
         const successRateQuery = await pool.query(`
       SELECT
         SUM(CASE WHEN success = TRUE THEN 1 ELSE 0 END) AS success,
         SUM(CASE WHEN success = FALSE THEN 1 ELSE 0 END) AS error
       FROM prompt_logs;
     `);
+        // --- Saubere Typkonversionen (Postgres liefert manchmal strings) ---
+        const costOverTime = costOverTimeQuery.rows.map((r) => ({
+            date: r.date,
+            cost: Number(r.cost),
+        }));
+        const costByModel = costByModelQuery.rows.map((r) => ({
+            model: r.model,
+            cost: Number(r.cost),
+        }));
+        const tokensByModel = tokensByModelQuery.rows.map((r) => ({
+            model: r.model,
+            input_tokens: Number(r.input_tokens),
+            output_tokens: Number(r.output_tokens),
+        }));
+        const avgLatencyByModel = avgLatencyByModelQuery.rows.map((r) => ({
+            model: r.model,
+            avg_latency_ms: Number(r.avg_latency_ms),
+        }));
+        const successRow = successRateQuery.rows[0] || { success: 0, error: 0 };
+        // --- Response ---
         res.json({
             totalPrompts: Number(kpi.total_prompts),
             totalTokens: Number(kpi.total_tokens),
             totalCost: Number(kpi.total_cost),
             avgCost: Number(kpi.avg_cost),
-            costOverTime: costOverTimeQuery.rows,
-            costByModel: costByModelQuery.rows,
-            tokensByModel: tokensByModelQuery.rows,
-            successRate: successRateQuery.rows[0],
+            costOverTime,
+            costByModel,
+            tokensByModel,
+            avgLatencyByModel, // <-- HIER ist die Latenz drin
+            successRate: {
+                success: Number(successRow.success),
+                error: Number(successRow.error),
+            },
         });
     }
     catch (err) {

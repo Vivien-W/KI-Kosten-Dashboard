@@ -1,15 +1,22 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-const DarkModeContext = createContext();
+type DarkModeContextType = {
+  darkMode: boolean;
+  setDarkMode: (value: boolean) => void;
+};
 
-export function DarkModeProvider({ children }) {
-  const [darkMode, setDarkMode] = useState(() => {
+const DarkModeContext = createContext<DarkModeContextType | undefined>(
+  undefined
+);
+
+export function DarkModeProvider({ children }: { children: React.ReactNode }) {
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem("theme") === "dark";
   });
 
-  // WICHTIG: Theme-Klasse und localStorage setzen
   useEffect(() => {
-    const root = window.document.documentElement;
+    const root = document.documentElement;
+
     if (darkMode) {
       root.classList.add("dark");
       localStorage.setItem("theme", "dark");
@@ -27,5 +34,9 @@ export function DarkModeProvider({ children }) {
 }
 
 export function useDarkMode() {
-  return useContext(DarkModeContext);
+  const context = useContext(DarkModeContext);
+  if (!context) {
+    throw new Error("useDarkMode must be used within DarkModeProvider");
+  }
+  return context;
 }

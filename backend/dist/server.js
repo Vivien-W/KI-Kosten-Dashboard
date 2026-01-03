@@ -9,6 +9,6 @@ app.use(cors());
 app.use(express.json());
 // API routes
 app.use("/api/prompts", promptsRouter);
-app.use("/api/prompts", dashboardRouter);
+app.use("/api/prompts/dashboard", dashboardRouter);
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Server läuft auf Port ${port}`));
