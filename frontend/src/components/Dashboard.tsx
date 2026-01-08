@@ -5,8 +5,6 @@ import CostByModelChart from "../charts/CostByModelChart.tsx";
 import TokensByModelChart from "../charts/TokensByModelChart.tsx";
 import LatencyByModelChart from "../charts/LatencyByModelChart.tsx";
 import PromptInput from "./PromptInput";
-import { useDarkMode } from "../context/DarkModeContext";
-import { Moon, Sun } from "lucide-react";
 
 import { fetchDashboardData } from "../services/stats";
 
@@ -30,59 +28,67 @@ interface DashboardData {
   }>;
 }
 
+/* 🔹 Zahlenformatierung zentral definiert */
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 4,
+});
+
 export default function Dashboard() {
-  const { darkMode, setDarkMode } = useDarkMode();
-
-  const [data, setData] = useState<DashboardData>({
-    totalPrompts: 0,
-    totalTokens: 0,
-    totalCost: 0,
-    avgCost: 0,
-
-    costOverTime: [],
-    costByModel: [],
-    tokensByModel: [],
-
-    avgLatencyByModel: [],
-  });
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDashboardData()
-      .then((res: any) =>
-        setData({
-          totalPrompts: res.totalPrompts,
-          totalTokens: res.totalTokens,
-          totalCost: res.totalCost,
-          avgCost: res.avgCost,
-          costOverTime: res.costOverTime,
-          costByModel: res.costByModel,
-          tokensByModel: res.tokensByModel,
-          avgLatencyByModel: res.avgLatencyByModel,
-        })
-      )
-      .catch((err) => console.error(err));
+      .then((res: DashboardData) => {
+        setData(res);
+      })
+      .catch(() => {
+        setError("Dashboard-Daten konnten nicht geladen werden.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
+
+  /* 🔹 Loading-State */
+  if (loading) {
+    return (
+      <div className="h-[300px] flex items-center justify-center text-gray-500">
+        Lade Dashboard-Daten …
+      </div>
+    );
+  }
+
+  /* 🔹 Error-State */
+  if (error) {
+    return (
+      <div className="p-4 rounded-xl bg-red-100 text-red-700 border border-red-200">
+        {error}
+      </div>
+    );
+  }
+
+  /* Type Guard – ab hier ist data garantiert vorhanden */
+  if (!data) return null;
 
   return (
     <div className="space-y-8">
-      {/* ⭐ Dark Mode Toggle oben rechts oder links */}
-      <button
-        onClick={() => setDarkMode(!darkMode)}
-        className="p-2 rounded-xl border hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-      >
-        {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-      </button>
-
       <PromptInput />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KPIBox title="Total Prompts" value={data.totalPrompts} />
         <KPIBox title="Total Tokens" value={data.totalTokens} />
-        <KPIBox title="Total Cost" value={`$${data.totalCost.toFixed(4)}`} />
+        <KPIBox
+          title="Total Cost"
+          value={currencyFormatter.format(data.totalCost)}
+        />
         <KPIBox
           title="Avg. Cost per Prompt"
-          value={`$${data.avgCost.toFixed(5)}`}
+          value={currencyFormatter.format(data.avgCost)}
         />
       </div>
 
