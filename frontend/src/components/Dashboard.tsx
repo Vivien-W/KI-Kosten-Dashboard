@@ -7,26 +7,7 @@ import LatencyByModelChart from "../charts/LatencyByModelChart.tsx";
 import PromptInput from "./PromptInput";
 
 import { fetchDashboardData } from "../services/stats";
-
-interface DashboardData {
-  totalPrompts: number;
-  totalTokens: number;
-  totalCost: number;
-  avgCost: number;
-
-  costOverTime: Array<{ date: string; cost: number }>;
-  costByModel: Array<{ model: string; cost: number }>;
-  tokensByModel: Array<{
-    model: string;
-    input_tokens: number;
-    output_tokens: number;
-  }>;
-
-  avgLatencyByModel: Array<{
-    model: string;
-    avg_latency_ms: number;
-  }>;
-}
+import type { DashboardData } from "../services/stats";
 
 /* 🔹 Zahlenformatierung zentral definiert */
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -42,9 +23,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData()
-      .then((res: DashboardData) => {
-        setData(res);
-      })
+      .then(setData)
       .catch(() => {
         setError("Dashboard-Daten konnten nicht geladen werden.");
       })
