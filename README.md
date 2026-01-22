@@ -1,25 +1,29 @@
 # KI-Kosten-Dashboard
 
+Ein Full-Stack-Dashboard zur Simulation und Analyse von KI-Prompt-Kosten.
+Das Projekt berechnet Token-Nutzung, Latenzen und Kosten, speichert diese in einer Datenbank und visualisiert sie im Frontend.
+Das Projekt ist bewusst als Simulation gebaut, um Kostenlogik, Datenfluss und Visualisierung zu lernen.
+
 Frontend enthält:
 
 ✔ React
 ✔ TypeScript
 ✔ TailwindCSS
 ✔ Recharts
-✔ User Interface (Dashboard, Charts, Pages, Components)
+✔ Dashboard mit KPIs, Charts und Prompt-Simulation
 
 Backend enthält:
 
 ✔ Express API
-✔ OpenAI API Calls
-✔ Latenz-Messung
-✔ Token-Cost-Berechnung
+✔ Simulation von KI-/OpenAI-Daten
+✔ Latenz-Simulation
+✔ Token- & Kostenberechnung
 ✔ PostgreSQL Anbindung
-✔ Logging / Speicherung der Daten
-✔ Endpoints
+✔ Logging & Analytics-Endpunkte
 
-Dokumentation:
-Zunächst wurde das React-Projekt erstellt und das Grundgerüst (Frontend und Backend) erstellt sowie die notwendigen Dependencies installiert. Diese wären TailwindCSS für das Frontend und express pg cors dotenv openai typescript ts-node-dev @types/node @types/express @types/cors für das Backend.
+Projektaubau:
+Zunächst wurde das React-Projekt sowie das Express-Backend initialisiert.
+Anschließend wurden die notwendigen Dependencies installiert: Diese wären TailwindCSS für das Frontend und express pg cors dotenv typescript ts-node-dev @types/node @types/express @types/cors für das Backend.
 Im nächsten Schritt wurde die Postgres-Datenbank erstellt. Damit wurde die Grundlage für das Monitoring-System geschaffen:
 
 - Logging der Prompt-Daten
@@ -132,9 +136,6 @@ Barchart
 Bar/Column chart
 → Wichtig für Analyse der Effizienz.
 
-4. Erfolgreiche vs. Fehlerhafte Prompts
-
-Donut chart / Pie chart
-→ Wie viele Requests sind gescheitert?
+4. Durchschnittliche Latenzzeit pro Modell
 
 Das Dashboard kann später beliebig erweitert werden.

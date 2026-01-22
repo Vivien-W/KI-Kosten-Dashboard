@@ -1,88 +1,81 @@
 import { useEffect, useState } from "react";
+import type { ModelEntry, SimulateResponse } from "../services/prompts";
+import { fetchModels, simulatePrompt } from "../services/prompts";
 
-interface ModelEntry {
-  model: string;
-  input_price_per_million: number;
-  output_price_per_million: number;
-}
-
-interface SimulateResponse {
-  prompt: string;
-  response: string;
-  model: string;
-  latency_ms: number;
-  input_tokens: number;
-  output_tokens: number;
-  total_tokens: number;
-  cost: string;
-  success: boolean;
-}
+/* 🔹 Zahlenformatierung */
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 5,
+});
 
 export default function PromptInput() {
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState("");
   const [models, setModels] = useState<ModelEntry[]>([]);
   const [result, setResult] = useState<SimulateResponse | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  // ---- Modelle vom Backend laden ----
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /* ---- Modelle laden ---- */
   useEffect(() => {
-    fetch("http://localhost:4000/api/prompts/models")
-      .then((res) => res.json())
+    fetchModels()
       .then((data) => {
         setModels(data);
         if (data.length > 0) setModel(data[0].model);
       })
-      .catch((err) =>
-        console.error("Modelle konnten nicht geladen werden:", err)
-      );
+      .catch(() => {
+        setError("Modelle konnten nicht geladen werden.");
+      });
   }, []);
 
-  // ---- Prompt Simulation senden ----
-  async function sendPrompt() {
+  /* ---- Prompt Simulation ---- */
+  async function handleSimulate() {
     if (!prompt.trim()) return;
 
     setLoading(true);
+    setError(null);
     setResult(null);
 
     try {
-      const res = await fetch("http://localhost:4000/api/prompts/simulate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, model }),
-      });
-
-      const data = await res.json();
-      setResult(data.data);
-    } catch (err) {
-      console.error("Fehler:", err);
+      const data = await simulatePrompt(prompt, model);
+      setResult(data);
+    } catch {
+      setError("Prompt konnte nicht simuliert werden.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow border border-gray-200 dark:border-gray-700 space-y-4">
-      <h2 className="text-2xl font-semibold text-black dark:text-white">
-        Prompt Simulation
-      </h2>
+      <h2 className="text-2xl font-semibold">Prompt Simulation</h2>
 
-      {/* Prompt Input */}
+      {/* Error */}
+      {error && (
+        <div className="p-3 rounded-xl bg-red-100 text-red-700 border border-red-200">
+          {error}
+        </div>
+      )}
+
+      {/* Prompt */}
       <textarea
-        className="w-full p-3 border rounded-xl bg-gray-100 dark:bg-gray-800 text-black dark:text-white"
+        className="w-full p-3 border rounded-xl bg-gray-100 dark:bg-gray-800"
         rows={4}
         placeholder="Prompt eingeben..."
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
       />
 
-      {/* Modell-Auswahl */}
+      {/* Modell */}
       <select
-        className="p-3 border rounded-xl bg-gray-100 dark:bg-gray-800 text-black dark:text-white w-full"
+        className="p-3 border rounded-xl bg-gray-100 dark:bg-gray-800 w-full"
         value={model}
         onChange={(e) => setModel(e.target.value)}
+        disabled={models.length === 0}
       >
-        {models.length === 0 && <option>Modelle werden geladen...</option>}
+        {models.length === 0 && <option>Modelle werden geladen…</option>}
 
         {models.map((m) => (
           <option key={m.model} value={m.model}>
@@ -93,11 +86,11 @@ export default function PromptInput() {
 
       {/* Button */}
       <button
-        onClick={sendPrompt}
-        disabled={loading}
-        className="w-full px-4 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-500"
+        onClick={handleSimulate}
+        disabled={loading || !prompt.trim()}
+        className="w-full px-4 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
       >
-        {loading ? "Simuliere..." : "Simulieren"}
+        {loading ? "Simuliere…" : "Simulieren"}
       </button>
 
       {/* Ergebnis */}
@@ -119,7 +112,7 @@ export default function PromptInput() {
           </p>
 
           <p>
-            <b>Kosten:</b> ${Number(result.cost).toFixed(5)}
+            <b>Kosten:</b> {currencyFormatter.format(result.cost)}
           </p>
 
           <p>

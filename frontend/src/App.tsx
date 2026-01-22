@@ -15,7 +15,7 @@ function App() {
             min-h-screen 
             bg-linear-to-br from-gray-100 via-gray-50 to-gray-200
             dark:from-[#0d1117] dark:via-[#111827] dark:to-[#1f2937]
-            text-gray-900 dark:text-gray-100
+            text-gray-900 dark:text-gray-500
             transition-colors duration-500
           "
         >

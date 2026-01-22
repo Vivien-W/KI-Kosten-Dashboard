@@ -1,12 +1,13 @@
+//NOTE: Input-Validierung und Typisierung weiter ausbauen!
+
 import { Router } from "express";
-import { pool } from "../db.js"; // DB Verbindung
+import { pool } from "../db.js";
 import { randomInt } from "crypto";
 
 export const router = Router();
 
 /*** Hilfsfunktionen für die Simulation*/
 function simulateTokenCount(prompt: string) {
-  // Sehr einfache Simulation
   const inputTokens = Math.floor(prompt.length / 4) + randomInt(5, 40);
   const outputTokens = randomInt(50, 500);
   const totalTokens = inputTokens + outputTokens;
@@ -34,7 +35,7 @@ router.post("/simulate", async (req, res) => {
     // Modellpreise aus DB laden
     const modelQuery = await pool.query(
       "SELECT * FROM ai_models WHERE model = $1",
-      [model]
+      [model],
     );
 
     if (modelQuery.rows.length === 0) {
@@ -59,7 +60,7 @@ router.post("/simulate", async (req, res) => {
     // Dummy AI-Antwort (kein API-Call!)
     const fakeResponse = `Simulierte Antwort basierend auf: "${prompt.slice(
       0,
-      50
+      50,
     )}..."`;
 
     // Eintrag speichern
@@ -98,7 +99,7 @@ router.post("/simulate", async (req, res) => {
 router.get("/models", async (_req, res) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM ai_models ORDER BY model ASC"
+      "SELECT * FROM ai_models ORDER BY model ASC",
     );
     res.json(result.rows);
   } catch (err: any) {
@@ -114,7 +115,7 @@ router.get("/models", async (_req, res) => {
 router.get("/recent", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM prompt_logs ORDER BY created_at DESC LIMIT 50"
+      "SELECT * FROM prompt_logs ORDER BY created_at DESC LIMIT 50",
     );
     res.json(result.rows);
   } catch (err) {
