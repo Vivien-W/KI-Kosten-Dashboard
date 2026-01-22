@@ -24,13 +24,7 @@ Backend enthält:
 Projektaubau:
 Zunächst wurde das React-Projekt sowie das Express-Backend initialisiert.
 Anschließend wurden die notwendigen Dependencies installiert: Diese wären TailwindCSS für das Frontend und express pg cors dotenv typescript ts-node-dev @types/node @types/express @types/cors für das Backend.
-Im nächsten Schritt wurde die Postgres-Datenbank erstellt. Damit wurde die Grundlage für das Monitoring-System geschaffen:
-
-- Logging der Prompt-Daten
-- Analytics / Charts
-- Kosten-Überwachung
-- historische Auswertungen
-- tägliche, wöchentliche bzw. monatliche KPIs
+Im nächsten Schritt wurde die Postgres-Datenbank erstellt. Damit wurde die Grundlage für das Monitoring-System geschaffen.
 
 Database-Name: ai_cost_dashboard
 Haupttabelle: prompt_logs
@@ -50,13 +44,69 @@ error_message TEXT,
 created_at TIMESTAMP DEFAULT NOW()
 );
 
-weitere Tabelle für automatische Kostenberechnung:
+weitere Tabelle für die modellabhängige Kostenberechnung:
 CREATE TABLE ai_models (
 id SERIAL PRIMARY KEY,
 model VARCHAR(50) UNIQUE NOT NULL,
 input_price_per_million NUMERIC(10,5) NOT NULL,
 output_price_per_million NUMERIC(10,5) NOT NULL
 );
+
+# Simulation von KI-Daten
+
+Da kein echter OpenAI-API-Call erfolgt, werden alle relevanten Daten simuliert.
+
+Token-Schätzung:
+Math.floor(prompt.length / 4) + Zufallskomponente
+Die Zufallskomponente sorgt für realistischere Werte.
+
+Kostenberechnung (Beispiel)
+const INPUT_PRICE = 0.15 / 1_000_000;
+const OUTPUT_PRICE = 0.60 / 1_000_000;
+
+function calculateCost(inputTokens, outputTokens) {
+return inputTokens _ INPUT_PRICE + outputTokens _ OUTPUT_PRICE;
+}
+
+Latenz-Simulation
+function simulateLatency() {
+return Math.floor(300 + Math.random() \* 900);
+}
+
+Backend-Flow
+
+- POST /api/prompts/simulate
+- Prompt & Modell empfangen
+- Tokens berechnen
+- Output-Tokens simulieren
+- Kosten berechnen
+- Latenz simulieren
+- Daten in PostgreSQL speichern
+- Ergebnis zurückgeben
+
+Frontend-Dashboard
+KPIs
+
+- Total Prompts
+- Total Tokens
+- Total Cost
+- Average Cost per Prompt
+
+Charts
+
+- Kostenentwicklung über Zeit
+- Kosten nach Modell
+- Tokens pro Modell
+- Durchschnittliche Latenz pro Modell
+
+Erweiterungsmöglichkeiten
+
+- Authentifizierung
+- Echte OpenAI-API-Integration
+- Fehler-Analytics
+- Zeitbasierte Filter (Tag / Woche / Monat)
+
+Noch ergänzen:
 
 💡 Wie simulieren wir „OpenAI-Daten“ korrekt?
 Wir erstellen eine Funktion im Backend, die bei jedem Prompt:
@@ -95,47 +145,4 @@ function simulateLatency() {
 return Math.floor(300 + Math.random() \* 900); // 300–1200ms realistisch
 }
 
-🧩 Gesamt-Simulations-Flow
-
-Backend-Route:
-POST /api/prompts/simulate
-Sie macht:
-
-1. Prompt aus Request lesen
-2. Tokens berechnen
-3. „Output-Tokens“ zufällig generieren
-4. Kosten berechnen
-5. Latenz simulieren
-6. Alles in PostgreSQL speichern
-7. Antwort mit allen Daten zurückgeben
-
-## Frontend
-
-Basierend auf der Datenbank prompt_logs + ai_models ergeben sich typische Kennzahlen:
-📌 1. KPIs
-KPI Beschreibung
-Total Prompts Anzahl aller ausgeführten Prompts
-Total Tokens Summe aller Tokens
-Total Cost Gesamtkosten aller Prompts
-Avg Cost per Prompt Durchschnittskosten pro Prompt
-
-📊 2. Charts (4 Stück)
-
-1. Kosten pro Tag / Monat
-
-Linienchart
-→ Wie teuer waren die Prompts über die Zeit?
-
-2. Top Modelle nach Kosten
-
-Barchart
-→ Welches Modell verursacht die meisten Kosten?
-
-3. Durchschnittliche Token-Anzahl pro Modell
-
-Bar/Column chart
-→ Wichtig für Analyse der Effizienz.
-
-4. Durchschnittliche Latenzzeit pro Modell
-
-Das Dashboard kann später beliebig erweitert werden.
+📊
