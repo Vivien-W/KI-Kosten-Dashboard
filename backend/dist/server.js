@@ -7,6 +7,16 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// 🔹 Health Check / Root Route
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "KI-Kosten-Dashboard API",
+    message: "Backend läuft 🎉",
+  });
+});
+
 // API routes
 app.use("/api/prompts", promptsRouter);
 app.use("/api/prompts/dashboard", dashboardRouter);
