@@ -2,10 +2,12 @@
 
 Ein Full-Stack-Dashboard zur Simulation und Analyse von KI-Prompt-Kosten.
 Das Projekt berechnet Token-Nutzung, Latenzen und Kosten, speichert diese in einer Datenbank und visualisiert sie im Frontend.
-Das Projekt ist bewusst als Simulation gebaut, um Kostenlogik, Datenfluss und Visualisierung zu lernen.
+Das Dashboard ist bewusst als Simulation gebaut, um Kostenlogik, Datenfluss und Visualisierung zu lernen.
+
+Wie realistisch ist die Simulation?
+-> Sie ist bewusst vereinfacht, bildet aber typische Größenordnungen von Token-Nutzung, Kosten und Latenz realistisch ab.
 
 Frontend enthält:
-
 ✔ React
 ✔ TypeScript
 ✔ TailwindCSS
@@ -13,7 +15,6 @@ Frontend enthält:
 ✔ Dashboard mit KPIs, Charts und Prompt-Simulation
 
 Backend enthält:
-
 ✔ Express API
 ✔ Simulation von KI-/OpenAI-Daten
 ✔ Latenz-Simulation
@@ -21,7 +22,8 @@ Backend enthält:
 ✔ PostgreSQL Anbindung
 ✔ Logging & Analytics-Endpunkte
 
-Projektaubau:
+# Projektaubau:
+
 Zunächst wurde das React-Projekt sowie das Express-Backend initialisiert.
 Anschließend wurden die notwendigen Dependencies installiert: Diese wären TailwindCSS für das Frontend und express pg cors dotenv typescript ts-node-dev @types/node @types/express @types/cors für das Backend.
 Im nächsten Schritt wurde die Postgres-Datenbank erstellt. Damit wurde die Grundlage für das Monitoring-System geschaffen.
@@ -57,8 +59,8 @@ output_price_per_million NUMERIC(10,5) NOT NULL
 Da kein echter OpenAI-API-Call erfolgt, werden alle relevanten Daten simuliert.
 
 Token-Schätzung:
-Math.floor(prompt.length / 4) + Zufallskomponente
-Die Zufallskomponente sorgt für realistischere Werte.
+Math.floor(prompt.length / 4) + Zufallskomponente (5–40 Tokens)
+Die Zufallskomponente sorgt für realistischere Schwankungen.
 
 Kostenberechnung (Beispiel)
 const INPUT_PRICE = 0.15 / 1_000_000;
@@ -68,9 +70,11 @@ function calculateCost(inputTokens, outputTokens) {
 return inputTokens _ INPUT_PRICE + outputTokens _ OUTPUT_PRICE;
 }
 
-Latenz-Simulation
+Latenz-Simulation:
+Zufällige Latenz zwischen ca. 200–1800 ms
+
 function simulateLatency() {
-return Math.floor(300 + Math.random() \* 900);
+return Math.floor(randomInt(200, 1800));
 }
 
 Backend-Flow
@@ -106,43 +110,25 @@ Erweiterungsmöglichkeiten
 - Fehler-Analytics
 - Zeitbasierte Filter (Tag / Woche / Monat)
 
-Noch ergänzen:
+## Was habe ich in diesem Projekt gelernt?
 
-💡 Wie simulieren wir „OpenAI-Daten“ korrekt?
-Wir erstellen eine Funktion im Backend, die bei jedem Prompt:
+- Wie ein Full-Stack-Projekt strukturiert ist und wie Frontend, Backend und Datenbank zusammenspielen
+- Wie man eine Express-API aufbaut und saubere Endpunkte für ein Frontend bereitstellt
+- Grundlagen der Datenmodellierung mit PostgreSQL (Logs, Referenztabellen, Aggregationen)
+- Wie Token-Nutzung, Kosten und Latenzen konzeptionell zusammenhängen
+- Wie man Daten aus dem Backend für KPIs und Charts aufbereitet
+- Arbeiten mit React + TypeScript in einem größeren Komponentenbaum
+- Umgang mit asynchronen Requests, Loading- und Error-States
+- Wie wichtig klare Trennung von Logik, Darstellung und Datenzugriff ist
 
-- input_tokens (Zahl anhand der Textlänge)
-- output_tokens (zufällige/statische Werte)
-- total_tokens (Summe)
-- latency_ms (realistisch simuliert)
-- cost (berechnet aus den Tokens)
-- model (z. B. "gpt-4o-mini" oder "gpt-o1") berechnet und anschließend in der PostgreSQL-Datenbank speichert.
+### Erkenntnisse
 
-💡 Wie berechnen wir die Token?
-Wir definieren:
-function estimateTokens(prompt: string): number {
-return Math.floor(prompt.length / 4); // sehr grobe token-Schätzung
-}
+- Simulationen sind ein gutes Mittel, um komplexe Systeme zu verstehen, ohne von externen APIs abhängig zu sein
+- Gute Visualisierung hilft, technische Metriken verständlich darzustellen
+- Kleine Architekturentscheidungen (z. B. Datenstruktur, Endpunkte) haben großen Einfluss auf das Frontend
 
-## Beispiel: Kostenberechnung
+### Nächste Schritte
 
-GPT-4o-mini (fiktiv):
-
-input: $0.15 / 1M tokens
-output: $0.60 / 1M tokens
-
-Wir simulieren die Preise:
-const INPUT_PRICE = 0.15 / 1_000_000;
-const OUTPUT_PRICE = 0.60 / 1_000_000;
-
-function calculateCost(inputTokens: number, outputTokens: number) {
-return inputTokens _ INPUT_PRICE + outputTokens _ OUTPUT_PRICE;
-}
-
-## Latenz simulieren:
-
-function simulateLatency() {
-return Math.floor(300 + Math.random() \* 900); // 300–1200ms realistisch
-}
-
-📊
+- Verbesserung von Typisierung und Validierung
+- Erweiterung des Dashboards um Zeitfilter und Benutzerkonzepte
+- Optional: Anbindung einer echten OpenAI-API
