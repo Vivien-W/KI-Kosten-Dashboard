@@ -1,5 +1,3 @@
-import React from "react";
-
 interface KPIBoxProps {
   title: string;
   value: string | number;
