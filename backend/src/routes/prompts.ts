@@ -122,3 +122,48 @@ router.get("/recent", async (req, res) => {
     res.status(500).json({ error: "Konnte Logs nicht laden" });
   }
 });
+
+//Temporäre Init-Route
+
+router.get("/init-db", async (_req, res) => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS prompt_logs (
+        id SERIAL PRIMARY KEY,
+        prompt TEXT NOT NULL,
+        response TEXT,
+        model VARCHAR(50) NOT NULL,
+        latency_ms INTEGER,
+        input_tokens INTEGER,
+        output_tokens INTEGER,
+        total_tokens INTEGER,
+        cost NUMERIC(10,5),
+        success BOOLEAN DEFAULT TRUE,
+        error_message TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS ai_models (
+        id SERIAL PRIMARY KEY,
+        model VARCHAR(50) UNIQUE NOT NULL,
+        input_price_per_million NUMERIC(10,5) NOT NULL,
+        output_price_per_million NUMERIC(10,5) NOT NULL
+      );
+    `);
+
+    await pool.query(`
+      INSERT INTO ai_models (model, input_price_per_million, output_price_per_million)
+      VALUES
+        ('gpt-4o-mini', 0.15, 0.60),
+        ('gpt-o1', 1.00, 3.00)
+      ON CONFLICT (model) DO NOTHING;
+    `);
+
+    res.json({ status: "ok", message: "DB initialisiert 🚀" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "DB-Init fehlgeschlagen" });
+  }
+});
