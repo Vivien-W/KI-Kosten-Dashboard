@@ -123,12 +123,19 @@ router.get("/init-db", async (_req, res) => {
       );
     `);
         await pool.query(`
-      INSERT INTO ai_models (model, input_price_per_million, output_price_per_million)
-      VALUES
-        ('gpt-4o-mini', 0.15, 0.60),
-        ('gpt-o1', 1.00, 3.00)
-      ON CONFLICT (model) DO NOTHING;
-    `);
+    INSERT INTO ai_models (model, input_price_per_million, output_price_per_million)
+    VALUES
+      ('gpt-4o', 5.00, 15.00),
+      ('gpt-4o-mini', 0.15, 0.60),
+      ('gpt-3.5-turbo', 0.50, 1.50),
+      ('claude-opus-4.5', 5.00, 25.00),
+      ('claude-sonnet-4.5', 3.00, 15.00),
+      ('claude-haiku-4.5', 1.00, 5.00),
+      ('gemini-2.5-pro-200k', 1.25, 10.00),
+      ('gemini-2.5-flash', 0.30, 2.50),
+      ('gemini-2.5-flash-lite', 0.10, 0.40)
+    ON CONFLICT (model) DO NOTHING;
+`);
         res.json({ status: "ok", message: "DB initialisiert 🚀" });
     }
     catch (err) {

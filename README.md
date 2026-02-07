@@ -1,5 +1,7 @@
 # KI-Kosten-Dashboard
 
+Link zur Live-Demo: https://ki-kosten-dashboard.vercel.app/
+
 Ein Full-Stack-Dashboard zur Simulation und Analyse von KI-Prompt-Kosten.
 Das Projekt berechnet Token-Nutzung, Latenzen und Kosten, speichert diese in einer Datenbank und visualisiert sie im Frontend.
 Das Dashboard ist bewusst als Simulation gebaut, um Kostenlogik, Datenfluss und Visualisierung zu lernen.
