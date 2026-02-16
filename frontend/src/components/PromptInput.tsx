@@ -69,7 +69,12 @@ export default function PromptInput() {
       />
 
       {/* Modell */}
+      <label htmlFor="model-select" className="block mb-2 font-medium">
+        KI-Modell auswählen
+      </label>
+
       <select
+        id="model-select"
         className="p-3 border rounded-xl bg-gray-100 dark:bg-gray-800 w-full"
         value={model}
         onChange={(e) => setModel(e.target.value)}
@@ -86,8 +91,10 @@ export default function PromptInput() {
 
       {/* Button */}
       <button
+        type="button"
         onClick={handleSimulate}
         disabled={loading || !prompt.trim()}
+        aria-busy={loading}
         className="w-full px-4 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
       >
         {loading ? "Simuliere…" : "Simulieren"}
